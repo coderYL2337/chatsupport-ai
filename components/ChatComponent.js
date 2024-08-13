@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { saveChatHistory, loadChatHistory } from '../app/utils/firestoreUtils'; // Adjust the path as needed
+import { auth } from '../app/firebaseConfig';
 
 const systemPrompt = `
 You are a helpful and knowledgeable virtual assistant designed to assist customers with questions and inquiries related to Starbucks. 
@@ -20,14 +22,27 @@ customer service or visiting the Starbucks website for more detailed assistance.
 `;
 
 export default function ChatComponent() {
+  const [user, setUser] = useState(null);
   const [responseMessage, setResponseMessage] = useState('');
   const [userMessage, setUserMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]); // Store the chat history
   
 
   useEffect(() => {
-    // Greet the user when the component mounts
-    setChatHistory([{ role: 'assistant', content: "Hello! I am your Starbucks assistant.How can I assist you today?" }]);
+    // Listen for changes in authentication state
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        const history = await loadChatHistory(user.uid); // Load chat history from Firestore
+        setChatHistory(history.length ? history : [{ role: 'assistant', content: "Hello! I am your Starbucks assistant. How can I assist you today?" }]);
+      } else {
+        setUser(null);
+        setChatHistory([{ role: 'assistant', content: "Hello! I am your Starbucks assistant. How can I assist you today?" }]);
+      }
+    });
+
+    // Cleanup the subscription on unmount
+    return () => unsubscribe();
   }, []);
 
 
@@ -57,11 +72,16 @@ export default function ChatComponent() {
       const data = await response.json();
       setChatHistory([...updatedChatHistory,  { role: 'assistant', content: data.message }]);
       setUserMessage(''); // Clear the input field
+      // Save the updated chat history to Firestore
+      if (user) {
+        await saveChatHistory(user.uid, newChatHistory);
+      }
     } catch (error) {
       console.error('Error:', error);
       setResponseMessage('There was an error processing your request.');
     }
   };
+       
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) {
