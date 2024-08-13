@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const systemPrompt = `
 You are a helpful and knowledgeable virtual assistant designed to assist customers with questions and inquiries related to Starbucks. 
@@ -9,9 +9,11 @@ including beverages, food items, merchandise, store locations, store hours, and 
 Additionally, you are well-versed in Starbucks products for home use, such as various coffee beans, brewing methods, 
 and recipes for making Starbucks-style coffee at home, referencing information from athome.starbucks.com.
 
-When you greet a customer, start by asking if they have questions about store products, store locations, store hours, 
-the Starbucks Rewards program, at-home products, or something else, so you can better answer their questions. 
+When you greet a customer, start by asking if they have questions about store products, the Starbucks Rewards program, at-home products, or something else, so you can better answer their questions. 
 Based on their response, provide clear, concise, and accurate information in a friendly and professional manner.
+
+You can serve customers in multiple languages, including English, Spanish, and Chinese. 
+Please detect the language of the user's inquiry and respond in the same language. 
 
 If a customer asks a question that is outside your knowledge base, politely let them know and suggest contacting 
 customer service or visiting the Starbucks website for more detailed assistance.
@@ -21,8 +23,22 @@ export default function ChatComponent() {
   const [responseMessage, setResponseMessage] = useState('');
   const [userMessage, setUserMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]); // Store the chat history
+  
+
+  useEffect(() => {
+    // Greet the user when the component mounts
+    setChatHistory([{ role: 'assistant', content: "Hello! I am your Starbucks assistant.How can I assist you today?" }]);
+  }, []);
+
 
   const handleChat = async () => {
+    if (userMessage.trim() === '') return; // Prevent sending empty messages
+
+    const updatedChatHistory = [
+      ...chatHistory,
+      { role: 'user', content: userMessage }
+    ];
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -32,17 +48,24 @@ export default function ChatComponent() {
         body: JSON.stringify({
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMessage }
+            ...updatedChatHistory // Include the full conversation history
+           // { role: 'user', content: userMessage }
           ]
         }),
       });
 
       const data = await response.json();
-      setChatHistory([...chatHistory, { role: 'user', content: userMessage }, { role: 'assistant', content: data.message }]);
+      setChatHistory([...updatedChatHistory,  { role: 'assistant', content: data.message }]);
       setUserMessage(''); // Clear the input field
     } catch (error) {
       console.error('Error:', error);
       setResponseMessage('There was an error processing your request.');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      handleChat();
     }
   };
 
@@ -60,6 +83,7 @@ export default function ChatComponent() {
           type="text"
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}
+          onKeyPress={handleKeyPress} // Listen for Enter key press
           placeholder="Type your message here"
           style={styles.inputField}
         />
@@ -75,7 +99,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    height: '90vh', // Use most of the viewport height
+    height: '80vh', // Adjusted height to make room for input field
     maxWidth: '600px',
     margin: '0 auto',
     padding: '10px',
@@ -110,7 +134,7 @@ const styles = {
   inputContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginTop: '10px',
+    padding: '10px 0', // Added padding to lift the input from the bottom
   },
   inputField: {
     flexGrow: 1,
@@ -118,6 +142,7 @@ const styles = {
     borderRadius: '5px',
     border: '1px solid #ccc',
     marginRight: '10px',
+    fontSize: '16px', // Increase font size for better readability
   },
   sendButton: {
     padding: '10px 20px',
@@ -128,4 +153,3 @@ const styles = {
     cursor: 'pointer',
   },
 };
-
