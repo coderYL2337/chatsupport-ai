@@ -119,9 +119,10 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    height: '80vh', // Adjusted height to make room for input field
+    height: '70vh',
+    width: 'calc(100% - 40px)',
     maxWidth: '600px',
-    margin: '0 auto',
+    margin: '0 auto 20px',
     padding: '10px',
     backgroundColor: '#f4f4f4',
     borderRadius: '10px',
