@@ -81,7 +81,7 @@ const SignIn = () => {
             />
             <button onClick={handleSignIn} className="signInButton">Sign In</button>
             <button onClick={handleGoogleSignIn} className="googleSignInButton">Sign In with Google</button>
-            <p className="signUpPrompt">Don't have an account? <Link href="/signup" className="signUpLink">Sign up here</Link></p>
+            <p className="signUpPrompt">Don&apos;t have an account? <Link href="/signup" className="signUpLink">Sign up here</Link></p>
           </div>
         </div>
       )}
