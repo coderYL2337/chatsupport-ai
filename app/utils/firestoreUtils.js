@@ -29,3 +29,13 @@ export const loadChatHistory = async (userId) => {
     return [];
   }
 };
+
+export const clearChatHistory = async (userId) => {
+  try {
+    const userDoc = doc(db, "users", userId);
+    await setDoc(userDoc, { chatHistory: [] }, { merge: true });
+    console.log("Chat history cleared successfully");
+  } catch (error) {
+    console.error("Error clearing chat history: ", error);
+  }
+};

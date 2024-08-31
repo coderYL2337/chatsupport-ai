@@ -9,14 +9,15 @@ import { getFirestore } from 'firebase/firestore';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBynh8HcedIgIrBxskyE8E2q0SCqnrGxd4",
-  authDomain: "chatsupport-382de.firebaseapp.com",
-  projectId: "chatsupport-382de",
-  storageBucket: "chatsupport-382de.appspot.com",
-  messagingSenderId: "343593143364",
-  appId: "1:343593143364:web:6fb67044613922c480c011",
-  measurementId: "G-ET1S1M0040"
+  apiKey: process.env.NEXT_PUBLIC_FB_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FB_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FB_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FB_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FB_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FB_MEASUREMENT_ID
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

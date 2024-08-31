@@ -12,10 +12,7 @@ if (!process.env.PINECONE_API_KEY) {
     console.error('PINECONE_API_KEY is not set in the environment variables');
     process.exit(1);
 }
-if (!process.env.OPENAI_API_KEY) {
-    console.error('OPENAI_API_KEY is not set in the environment variables');
-    process.exit(1);
-}
+
 
 // Initialize Pinecone
 const pinecone = new Pinecone({
@@ -74,4 +71,24 @@ const addToPinecone = async (indexName, vector, metadata) => {
     }
 };
 
-module.exports = { scrapePage, generateEmbeddings, addToPinecone };
+const deleteFromPinecone = async (indexName, ids) => {
+    try {
+      const index = pinecone.Index(indexName);
+      await index.delete1({ ids });
+      console.log(`Deleted vectors with IDs: ${ids.join(', ')}`);
+    } catch (error) {
+      console.error('Error deleting from Pinecone:', error);
+      throw error;
+    }
+  };
+
+const queryPinecone = async (indexName, queryEmbedding) => {
+    const index = pinecone.Index(indexName);
+    const queryResponse = await index.query({
+      topK: 10,
+      vector: queryEmbedding,
+    });
+    return queryResponse;
+  };
+
+module.exports = { scrapePage, generateEmbeddings, addToPinecone, deleteFromPinecone, queryPinecone };
